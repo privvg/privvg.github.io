@@ -79,7 +79,7 @@
 <p>The <a href="https://github.com/privvg">privvg</a> project builds tools to generate <a href="https://en.wikipedia.org/wiki/Differential_privacy">differentially-private</a> synthetic databases from graphical collections of sequence data known as <em>variation graphs</em>.
 We document our work <a href="https://privvg.github.io/archives">here, in a series of blog posts and notes</a>, and <a href="https://github.com/privvg">publish our code</a> under open source licenses for free use by all.</p>
 
-<h2 id="variation-graphs">variation graphs</h2>
+<h2 id="variation-graphs">Variation graphs</h2>
 
 <p>A <a href="https://ekg.github.io/2019/07/09/Untangling-graphical-pangenomics">variation graph</a> represents the mutual alignment of a set of sequences in a compact, visually-accessible structure.
 They are used in diverse applications in <a href="https://doi.org/10.1038/nbt.4227">genome sequence analysis</a>, <a href="https://doi.org/10.1089/cmb.2010.0252">comparative genomics</a>, and <a href="https://doi.org/10.1016/j.ijhcs.2009.02.001">linguistics</a>.
@@ -91,7 +91,7 @@ Their <em>edges</em> describe allowed or observed transitions between nodes foun
 
 <p><img src="https://privvg.github.io/assets/H-3136.dot.png" alt="Example variation graph visualization with dot for H-3136" /></p>
 
-<h2 id="the-promise-of-differential-privacy-in-pangenomics">the promise of differential privacy in pangenomics</h2>
+<h2 id="the-promise-of-differential-privacy-in-pangenomics">The promise of differential privacy in pangenomics</h2>
 
 <p>Human genomes are both useful and difficult to utilize.
 Knowing what sequences (<a href="https://en.wikipedia.org/wiki/Allele">alleles</a> or <a href="https://en.wikipedia.org/wiki/Haplotype">haplotypes</a>) exist in the population can help us observe and understand new genomes that we assemble.
@@ -101,30 +101,35 @@ However, it can be <a href="https://doi.org/10.1038/nrg3723">difficult to share 
 <p>Researchers have deeply explored techniques to produce <a href="https://doi.org/10.1038/nrg3723">differentially-private summarizations of some genomic information, such as SNPs and other small variants</a>, but thus far no methods approach the question of differential privacy of arbitrary genome sequence and assemblies.
 As variation graphs are becoming a standard for the representation of pangenomes, which new sequencing technology is allowing us to rapidly accumulate for <a href="https://humanpangenome.org/">humans</a> and other species, they are an ideal target for the application of privacy-preserving data release.</p>
 
-<h2 id="differentially-private-mobility-data">differentially-private mobility data</h2>
+<h2 id="differentially-private-mobility-data">Differentially-private mobility data</h2>
 
 <p>Location data can be represented in a variation graph by encoding quantized location/times in nodes, and expressing individual movements as paths through these nodes.
-Just as a differentially-private variation graph can help us understand common haplotypes tracing through the graph, a differentially-private model of collective mobility information can help us to understand common flows of people through space and time.
-These flows are traditionally difficult for researchers and public planners to access and share, due to the risk of identification and tracking of individiuals.
+Just as a differentially-private variation graph can help us understand common haplotypes tracing through the graph, a differentially-private model of collective mobility information can help us to understand common flows of people through space and time.</p>
+
+<p>These flows are traditionally difficult for researchers and public planners to access and share, due to the risk of identification and tracking of individiuals.
 However, in light of the <a href="https://en.wikipedia.org/wiki/COVID-19_pandemic">COVID-19 pandemic</a> we see critical importance in making them available.
-Tools in privvg will support application to mobility data, but work remains to be done to transform the data into</p>
+Tools in privvg will support application to mobility data, but work remains to be done to transform the data into formats directly compatible with those used in pangenomics.</p>
 
-<h2 id="our-vision">our vision</h2>
+<h2 id="our-vision">Our vision</h2>
 
-<p>We envision a future in which individuals who assemble their genomes for personal or medical reasons could release (via a trusted third party) useful information from their own genome by mixing their genome and others in a privacy-preserving pangenomic variation graph.
-As a synthetic database, this differentially-private variation graph could be used directly as a reference system by tools that work on pangenomes.
+<p>We envision a future in which individuals who assemble their genomes for personal or medical reasons could release (via a trusted third party) useful information from their own genome by mixing their genome and others in a privacy-preserving pangenomic variation graph.</p>
+
+<p>As a synthetic database, this differentially-private variation graph could be used directly as a reference system by tools that work on pangenomes.
 This trusted third-party arrangement <a href="https://gnomad.broadinstitute.org/">matches contemporary practice in genomics</a>.
 Our implementation simply promises the release of larger-scale information about haplotypic structures and allele frequencies that will become available with ubiquitous genome assembly.</p>
 
-<h2 id="compact-distributable-data-models">compact, distributable data models</h2>
+<p>The same approach can be applied to mobility data, textual data, and other highly-repetitive collections of sequential data.</p>
+
+<h2 id="compact-distributable-data-models">Compact, distributable data models</h2>
 
 <p>Methods developed for variation graphs allow the efficient compression of collections of genome and redundant sequence data.
 A data structure (using the graph Burrows-Wheeler transform or <a href="https://doi.org/10.1093/bioinformatics/btz575">GBWT</a>) built from the <a href="https://www.internationalgenome.org/">1000 Genomes Project</a> sequences can store genomes using only 1 bit per 1000 base-pair of genome sequence.
-These approaches are not only effcient, but they are self indexes that support efficient queries to find and match sequences.
-Allowing for the redistribution of succinct data structures representing collections of genomes avoids the need to control data access or operate centralized servers.
+These approaches are not only effcient, but they are self indexes that support efficient queries to find and match sequences.</p>
+
+<p>Allowing for the redistribution of succinct data structures representing collections of genomes avoids the need to control data access or operate centralized servers.
 If they are compact, then researchers will only need minimal resources to use them.</p>
 
-<h2 id="our-funding">our funding</h2>
+<h2 id="our-funding">Our funding</h2>
 
 <p><a href="https://nlnet.nl/project/VariationGraph/">This project is funded</a> through the <a href="https://nlnet.nl/discovery">NGI0 Discovery Fund</a>, a fund established by <a href="https://nlnet.nl/">NLnet</a> with financial support from the European Commission’s <a href="https://ngi.eu/">Next Generation Internet</a> programme, under the aegis of DG Communications Networks, Content and Technology under grant agreement No 825322.</p>
 
