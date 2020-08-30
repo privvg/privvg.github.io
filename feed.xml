@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom" xml:lang="en-US">
+  <generator uri="http://jekyllrb.com" version="4.1.1">Jekyll</generator>
+  
+  
+  <link href="https://privvg.github.io/feed.xml" rel="self" type="application/atom+xml" />
+  <link href="https://privvg.github.io/" rel="alternate" type="text/html" hreflang="en-US" />
+  <updated>2020-08-30T07:47:21+00:00</updated>
+  <id>https://privvg.github.io//</id>
+
+  
+    <title type="html">privacy-preserving variation graphs</title>
+  
+
+  
+    <subtitle>The privvg project is building tools to create synthetic, privacy-preserving graph databases for pangenomes, location trajectories, texts, and other sparse data.</subtitle>
+  
+
+  
+    <author>
+        <name>Erik Garrison</name>
+      
+      
+    </author>
+  
+
+  
+  
+    <entry>
+      
+      <title type="html">Private pangenomics</title>
+      
+      
+      <link href="https://privvg.github.io/2020/08/29/private-pangenomics/" rel="alternate" type="text/html" title="Private pangenomics" />
+      
+      <published>2020-08-29T14:53:23+00:00</published>
+      <updated>2020-08-29T14:53:23+00:00</updated>
+      <id>https://privvg.github.io/2020/08/29/private-pangenomics</id>
+      <content type="html" xml:base="https://privvg.github.io/2020/08/29/private-pangenomics/">&lt;p&gt;A work in progress. TODO. And so on.&lt;/p&gt;
+
+&lt;p&gt;Outline:&lt;/p&gt;
+
+&lt;ul&gt;
+  &lt;li&gt;recap of problem&lt;/li&gt;
+  &lt;li&gt;projection into histogram-like space&lt;/li&gt;
+  &lt;li&gt;lessons from graph patterns with differential privacy&lt;/li&gt;
+&lt;/ul&gt;</content>
+
+      
+      
+      
+      
+      
+
+      
+        <author>
+            <name>Erik Garrison</name>
+          
+          
+        </author>
+      
+
+      
+        <category term="post" />
+      
+
+      
+        <category term="post" />
+      
+
+      
+        <summary type="html">A work in progress. TODO. And so on.</summary>
+      
+
+      
+      
+    </entry>
+  
+  
+</feed>
