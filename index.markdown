@@ -5,8 +5,6 @@
 layout: home
 ---
 
-# _privvg_
-
 The [privvg](https://github.com/privvg) project builds tools to generate [differentially-private](https://en.wikipedia.org/wiki/Differential_privacy) synthetic databases from graphical collections of sequence data known as *variation graphs*.
 We document our work [here, in a series of blog posts and notes]({{ site.url }}/archives), and [publish our code](https://github.com/privvg) under open source licenses for free use by all.
 
