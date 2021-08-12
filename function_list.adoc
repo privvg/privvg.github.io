@@ -1,0 +1,60 @@
+= List of exported gbwt function
+
+Lars Vogel(c) 2016 vogella GmbH
+Version 0.3, 17.05.2021
+// :sectnums!:
+:keywords: AsciiDoc
+
+
+[code]
+====
+DGBWT_new
+DGBWT_delete
+DGBWT_insert
+DGBWT_to_GBWT
+GBWT_new
+GBWT_delete
+GBWT_first_node
+GBWT_find
+GBWT_bi_find
+GBWT_SEARCHSTATE_extend
+GBWT_BI_SEARCHSTATE_extend_forward
+GBWT_BI_SEARCHSTATE_extend_backward
+GBWT_runs
+GBWT_size
+GBWT_sequences
+GBWT_sigma
+GBWT_samples
+GBWT_effective
+GBWT_empty
+GBWT_bidirectional
+SEARCHSTATE_new
+SEARCHSTATE_delete
+SEARCHSTATE_node
+SEARCHSTATE_range
+BI_SEARCHSTATE_forward
+BI_SEARCHSTATE_backward
+BI_SEARCHSTATE_size
+BI_SEARCHSTATE_new
+BI_SEARCHSTATE_delete
+SEARCHSTATE_size
+SEARCHSTATE_empty
+SEARCHSTATE_flip
+GBWT_SEARCHSTATE_contains
+GBWT_contains
+GBWT_contains_edge
+GBWT_edge
+GBWT_to_comp
+GBWT_to_node
+GBWT_node_size
+GBWT_LF_next_node_from_offset
+GBWT_LF_next_node_from_edge
+GBWT_LF_next_offset_from_node
+GBWT_LF_next_offset_from_position
+GBWT_LF_range_of_successors_from_node
+GBWT_LF_range_of_successors_from_search_state
+GBWTGRAPH_gfa_to_gbwt
+SEARCHSTATE_sizeof
+BI_SEARCHSTATE_sizeof
+====
+

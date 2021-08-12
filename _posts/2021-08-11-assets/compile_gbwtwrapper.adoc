@@ -1,0 +1,77 @@
+= How to compile gbwtwrapper library
+
+
+
+=== First step
+
+Clone the gbwtgraph repository recursively
+[source]
+====
+git clone --depth=1 --recursive https://github.com/jltsiren/gbwtgraph
+====
+
+This will clone all the dependencies (recursively), which will then have to compile manually.
+To achieve that, is essential to make some modifications to the Makefiles.
+both gbwt and gbwt graph depend on sdsl-lite, located (at the time of writing)
+in deps/gbwt/deps/sdsl-lite and is different than the path in Makefiles,
+the later being "SDSL_DIR=../sdsl-lite". The most convenient way to fix this is by creating symbolic links.
+From one level outside the cloned project run:
+[source]
+====
+cd ../ && ln -s gbwtgraph/deps/gbwt/deps/sdsl-lite ./sdsl-lite && cd gbwtgraph/deps && ln -s gbwt/deps/sdsl-lite sdsl-lite && ../
+====
+=== Install  sdsl-lite
+Next compile and install the sdsl-lite
+go to  gbwtgraph/deps/gbwt/deps/sdsl-lite
+and edit CMakeLists.txt
+then add somewhere at the top of the file
+[source]
+====
+set( CMAKE_CXX_FLAGS "-fPIC" )
+====
+This flag is  required for a dynamic library build.
+
+Next run cmake
+[source]
+====
+ cmake . && make && sudo make install
+====
+Ignore sudo if for some reason you already have the necessary privileges.
+
+=== Install gbwt
+For that project the -fPIC flag seems to be included so a simple make will suffice.
+Navigate to gbwtgraph/deps/gbwt and run
+[source]
+====
+make && make install && sudo ./install /usr/local/ && ../
+====
+
+=== Install libhandlegraph
+From gbwtgraph/deps/libhandlegraph
+run
+[source]
+===
+cmake . && make CXXFLAGS="-fPIC" && sudo make install
+===
+=== Install gbwtgraph
+Here the make file is well preconfigured. So from the top level of the
+gbwtgraph repository run
+====
+make && make install && sudo ./install /usr/local/ && ../
+====
+Now the folder /usr/local/lib must include the following files libhandlegraph.a libhandlegraph.so libgbwt.a libgbwtgraph.a
+=== Last step: compile the wrapper
+
+Clone the wrapper
+[source]
+====
+clone https://github.com/pangenome/gbwt-wrapper && cd gbwt-wrapper
+====
+Run
+[source]
+====
+cd gbwt-wrapper && gcc -c -fPIC gbwt_wrapper.cpp; g++ -o libgbwtwrapper.so -Wl,--whole-archive /usr/local/lib/libgbwtgraph.a /usr/local/lib/libhandlegraph.a /usr/local/lib/libsdsl.a /usr/local/lib/libgbwt.a -Wl,--no-whole-archive -shared gbwt_wrapper.o -pthread -fopenmp
+====
+Or just run build.script. Eventually you will end up with libgbwtwrapper.so  in /usr/local/lib
+
+You can find the list of exposed functions xref:function_list.adoc [here]

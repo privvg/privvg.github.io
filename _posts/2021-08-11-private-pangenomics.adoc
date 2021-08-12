@@ -1,0 +1,49 @@
+= Diving into privacy pangenomics
+
+
+== Assembling the toolkit
+To push forward with the implementation of a system that utilizes the best aspects
+of a variation graph and a synthetic database coupled with (differential) privacy
+guaranties we will - of course - need  ways to manipulate variation graphs or more
+precisely  *GraphBurrows-Wheeler Transform data structures*,  _gbwt_ for sort.
+
+There were not many available options at the time of writing so the best strategy
+was to be wrap the https://github.com/jltsiren/gbwt[jltsiren/gbwt]
+
+[NOTE, caption=Objective]
+====
+Create a library  to expose functionality from https://github.com/jltsiren/gbwt[jltsiren/gbwt]
+====
+
+== Solving the problem
+There is no easy way to access the api from https://github.com/jltsiren/gbwt[jltsiren/gbwt].
+other than the tools offered by the repository, or as an import for other C/C++  projects.
+The project is written in C++ so object methods had to be turned to functions action on objects
+So
+[source]
+====
+Object.call(args)
+====
+becomes
+[source]
+====
+function(Object  args)
+====
+To avoid naming collisions between classes with the same method names, each function
+that calls a class method  is named as "CLASS_method". For example
+[example]
+====
+gbwt.find(node)
+====
+becomes
+[example]
+====
+GBWT_find(gbwt, node)
+====
+
+Refer to xref:./2021-08-11-assets/compile_gbwtwrapper.adoc[How to compile the library] for more information.
+Alternatively you can build the library in a Docker container using the link:./2021-08-11-assets/Dockerfile[Dockerfile]
+
+You can find the list of exposed functions xref:./2021-08-11-assets/function_list.adoc[here]
+
+

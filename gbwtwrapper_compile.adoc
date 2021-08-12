@@ -1,0 +1,51 @@
+
+// = Compiling the library
+//
+// :toc:
+// :toclevels: 4
+// :toc-title: Compiling the library
+
+
+== How to compile the library
+
+We have to compile the above to projects and force the to produce static libraries that we can link later together
+How to compile the wrapper library
+Clone the repository recursively
+git clone --depth=1 --recursive https://github.com/jltsiren/gbwtgraph
+This will clone all the dependencies recursively, which will have to compile manually. Before that, is essential to deal with the MakeFiles. both gbwt and gbwt graph depend on sdsl-lite, located (at the time of writing) in deps/gbwt/deps/sdsl-lite and is different than the path in MakeFiles, the later being "SDSL_DIR=../sdsl-lite". The most convenient way to fix this is by creating symbolic links. From the top level directory run.
+cd ../ && ln -s gbwtgraph/deps/gbwt/deps/sdsl-lite ./sdsl-lite && cd gbwtgraph/deps && ln -s gbwt/deps/sdsl-lite sdsl-lite && ../
+Next compile and install the sdsl-lite, and libhandlegraph header and library files.
+run
+cd gbwtgraph/deps/gbwt/deps/sdsl-lite
+and edit
+CMakeLists.txt
+then insert somewhere at the top of the file
+set( CMAKE_CXX_FLAGS "-fPIC" )
+save, exit and
+cd gbwtgraph/deps/gbwt/deps/sdsl-lite && cmake . && make && sudo make install
+The -fPIC flag is necessary in order to later build a dynamic library. The last "make install" command probably needs admin privileges, so sudo make install seems appropriate
+Install gbwt
+Fortunately the -fPIC flag seems to be incuded so a simple make will suffice Navigate to gbwtgraph/deps/gbwt and run
+make && make install && sudo ./install /usr/local/ && ../
+Install libhandlegraph
+run from gbwtgraph/deps/libhandlegraph
+cmake . && make CXXFLAGS="-fPIC" && sudo make install
+again the last command might need sudo-ing
+Install gbwtgraph
+from gbwtgraph, Edit the install file and change the line
+make -j "${JOBS}"
+to make CXXFLAGS="-fPIC" -j "${JOBS}"
+then
+sudo ./install /usr/local
+Now the folder /usr/local/lib must include the following files libhandlegraph.a libhandlegraph.so libgbwt.a libgbwtgraph.a
+Last step: compile the wrapper
+abandon gbwtgraph, and clone the wrapper
+clone https://github.com/pangenome/gbwt-wrapper && cd gbwt-wrapper
+Then run
+cd gbwt-wrapper && gcc -c -fPIC gbwt_wrapper.cpp; g++ -o libgbwtwrapper.so -Wl,--whole-archive /usr/local/lib/libgbwtgraph.a /usr/local/lib/libhandlegraph.a /usr/local/lib/libsdsl.a /usr/local/lib/libgbwt.a -Wl,--no-whole-archive -shared gbwt_wrapper.o -pthread -fopenmp
+Or just run the build.script This will produce the libgbwtwrapper.so
+Exposing the api
+The libgbwtwrapper.so
+Exposes API from gbwt and gbawtgraph in the following way. Most functions are class methods and so they operate on class instances and they are prefixed with the class' name capitalized and accept the class as as an extra first argumemnt. So find(node) from Gbwt class becomes GBWT_find(class, node). Exception is the constructors like GBWT_new , they do not need an extra argument Struct methods and functions like SearchState also work under the same principle. They accept a first argument with either a SearchState to call it's methods or a SearchState to mutate (return) and/or maybe both The need to mutate a state arise from the fact that you have to allocate memory when creating most of these data structure , and this way you have much more control.
+List of currently exposed api
+We created a very simple function in Racket that uses the api. The privacy pangenomics Project exposes a single functions call-external-method . To call for instance the GBWT_find method you just call-external-method 'GBWT_find <args>
