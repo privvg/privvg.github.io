@@ -41,7 +41,7 @@ becomes
 GBWT_find(gbwt, node)
 ====
 
-Refer to xref:./2021-08-11-assets/compile_gbwtwrapper.adoc[How to compile the library] for more information.
+Refer to xref:{{site.url}}/assets/compile_gbwtwrapper.adoc[How to compile the library] for more information.
 Alternatively you can build the library in a Docker container using the link:./2021-08-11-assets/Dockerfile[Dockerfile]
 
 You can find the list of exposed functions xref:./2021-08-11-assets/function_list.adoc[here]

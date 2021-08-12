@@ -41,25 +41,30 @@ Ignore sudo if for some reason you already have the necessary privileges.
 === Install gbwt
 For that project the -fPIC flag seems to be included so a simple make will suffice.
 Navigate to gbwtgraph/deps/gbwt and run
+
 [source]
 ====
 make && make install && sudo ./install /usr/local/ && ../
 ====
 
 === Install libhandlegraph
-From gbwtgraph/deps/libhandlegraph
-run
+From gbwtgraph/deps/libhandlegraph run
+
 [source]
 ===
 cmake . && make CXXFLAGS="-fPIC" && sudo make install
 ===
+
 === Install gbwtgraph
 Here the make file is well preconfigured. So from the top level of the
 gbwtgraph repository run
+
+[source]
 ====
 make && make install && sudo ./install /usr/local/ && ../
 ====
 Now the folder /usr/local/lib must include the following files libhandlegraph.a libhandlegraph.so libgbwt.a libgbwtgraph.a
+
 === Last step: compile the wrapper
 
 Clone the wrapper
@@ -74,4 +79,4 @@ cd gbwt-wrapper && gcc -c -fPIC gbwt_wrapper.cpp; g++ -o libgbwtwrapper.so -Wl,-
 ====
 Or just run build.script. Eventually you will end up with libgbwtwrapper.so  in /usr/local/lib
 
-You can find the list of exposed functions xref:function_list.adoc [here]
+You can find the list of exposed functions xref:{{site.url}}function_list.adoc [here]

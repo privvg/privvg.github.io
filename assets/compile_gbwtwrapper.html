@@ -521,24 +521,35 @@ Navigate to gbwtgraph/deps/gbwt and run</p>
 <div class="sect2">
 <h3 id="_install_libhandlegraph">Install libhandlegraph</h3>
 <div class="paragraph">
-<p>From gbwtgraph/deps/libhandlegraph
-run</p>
+<p>From gbwtgraph/deps/libhandlegraph run</p>
 </div>
 <div class="listingblock">
 <div class="content">
 <pre class="highlight"><code>===
 cmake . &amp;&amp; make CXXFLAGS="-fPIC" &amp;&amp; sudo make install
-===
-=== Install gbwtgraph
-Here the make file is well preconfigured. So from the top level of the
-gbwtgraph repository run
-====
-make &amp;&amp; make install &amp;&amp; sudo ./install /usr/local/ &amp;&amp; ../
-====
-Now the folder /usr/local/lib must include the following files libhandlegraph.a libhandlegraph.so libgbwt.a libgbwtgraph.a
-=== Last step: compile the wrapper</code></pre>
+===</code></pre>
 </div>
 </div>
+</div>
+<div class="sect2">
+<h3 id="_install_gbwtgraph">Install gbwtgraph</h3>
+<div class="paragraph">
+<p>Here the make file is well preconfigured. So from the top level of the
+gbwtgraph repository run</p>
+</div>
+<div class="exampleblock">
+<div class="content">
+<div class="paragraph">
+<p>make &amp;&amp; make install &amp;&amp; sudo ./install /usr/local/ &amp;&amp; ../</p>
+</div>
+</div>
+</div>
+<div class="paragraph">
+<p>Now the folder /usr/local/lib must include the following files libhandlegraph.a libhandlegraph.so libgbwt.a libgbwtgraph.a</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_last_step_compile_the_wrapper">Last step: compile the wrapper</h3>
 <div class="paragraph">
 <p>Clone the wrapper</p>
 </div>
@@ -563,13 +574,13 @@ Now the folder /usr/local/lib must include the following files libhandlegraph.a 
 <p>Or just run build.script. Eventually you will end up with libgbwtwrapper.so  in /usr/local/lib</p>
 </div>
 <div class="paragraph">
-<p>You can find the list of exposed functions <a href="function_list.adoc ">here</a></p>
+<p>You can find the list of exposed functions <a href="{{site.url}}function_list.adoc ">here</a></p>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-08-12 21:00:35 +0300
+Last updated 2021-08-12 21:38:44 +0300
 </div>
 </div>
 </body>
