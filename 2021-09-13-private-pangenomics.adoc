@@ -113,8 +113,15 @@ Now you cant use gbwtgraph from within Racket  by doing
 The names for all the exported functions  functions are located in the scheme_reload function
 in the gbwtgraph_wrap.cxx file generated from swig
 
-[red]
-*Update:* Instead of building it step by step  you use the   https://gist.githubusercontent.com/Gavlooth/0f5eba1124044a1220fdafd7c12c38c9/raw/4dbd945acc6147022fb2c68de4cb92ea48acc6e5/Dockerfile[Dockerfile]
+
+
+ Next steps: Differential privacy
+
+==Update
+Instead of building it step by step  you use the   https://gist.githubusercontent.com/Gavlooth/0f5eba1124044a1220fdafd7c12c38c9/raw/4dbd945acc6147022fb2c68de4cb92ea48acc6e5/Dockerfile[Dockerfile]
+Now that we managed to embed gbwtgraph in racket - with the potential of adding other languages,
+we have the necessary tools to  proceed with the next step
+and actually make s DSL for differential privacy on variation graphs
 
 
 
