@@ -452,7 +452,7 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 <div class="sectionbody">
 <div class="paragraph">
 <p>For the past 4 months I was trying - and by trying I mean straggling - to simultaneously learn C++
-and create a wrapper around <a href="https://github.com/jltsiren/gbwtgraph">gbwtgraph</a> . Having only limited experience exposing api
+and create a wrapper around <a href="https://github.com/jltsiren/gbwtgraph">gbwtgraph</a>t . Having only limited experience exposing api
 from C, I assumed that it would have been a similar undertaking.
 It turned out quite the opposite, it&#8217;s a huge deal to export method functionality and/from C++.
 The resulting the <a href="https://github.com/pangenome/gbwt-wrapper">wrapper code</a> kept growing,
@@ -521,7 +521,15 @@ So do an in place replace of "const static" with "static const" in gbwtgraph&#82
 </div>
 <div class="listingblock">
 <div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">find ./ | xargs -I % perl -pi -e 's/static const/const static/g'</code></pre>
+<pre class="highlight"><code class="language-bash" data-lang="bash">find ./ | xargs -I % perl -pi -e 's/static const/const static/g' %</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Similarly do</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlight"><code class="language-bash" data-lang="bash">perl -pi -e 's/^\[\[deprecated/\/\/\[\[deprecated/' /usr/local/include/handlegraph/types.hpp</code></pre>
 </div>
 </div>
 </div>
@@ -601,8 +609,11 @@ Compile the object files to a dynamic library.</p>
 </div>
 </div>
 <div class="paragraph">
-<p>You can find the names of the Racket functions in the scheme_reload function
+<p>The names for all the exported functions  functions are located in the scheme_reload function
 in the gbwtgraph_wrap.cxx file generated from swig</p>
+</div>
+<div class="paragraph">
+<p><strong>Update:</strong> Instead of building it step by step  you use the   <a href="https://gist.githubusercontent.com/Gavlooth/0f5eba1124044a1220fdafd7c12c38c9/raw/4dbd945acc6147022fb2c68de4cb92ea48acc6e5/Dockerfile">Dockerfile</a></p>
 </div>
 </div>
 </div>
@@ -610,7 +621,7 @@ in the gbwtgraph_wrap.cxx file generated from swig</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-09-14 07:37:13 +0300
+Last updated 2021-09-15 15:04:22 +0300
 </div>
 </div>
 </body>
