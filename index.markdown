@@ -2,7 +2,7 @@
 # Feel free to add content and custom Front Matter to this file.
 # To modify the layout, see https://jekyllrb.com/docs/themes/#overriding-theme-defaults
 
-layout: page
+layout: home
 ---
 
 The [privvg](https://github.com/privvg) project builds tools to generate [differentially-private](https://en.wikipedia.org/wiki/Differential_privacy) synthetic databases from graphical collections of sequence data known as *variation graphs*.
