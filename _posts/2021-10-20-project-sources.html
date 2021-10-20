@@ -5,8 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.16">
-<meta name="author" content="Christos Chatzifountas">
-<title>Wrapping up</title>
+<title>Source Code &amp; Repositories</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -440,205 +439,36 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article">
 <div id="header">
-<h1>Wrapping up</h1>
-<div class="details">
-<span id="author" class="author">Christos Chatzifountas</span><br>
-<span id="email" class="email"><a href="mailto:christos.chatzifountas@yahoo.gr">christos.chatzifountas@yahoo.gr</a></span><br>
-</div>
+<h1>Source Code &amp; Repositories</h1>
 </div>
 <div id="content">
 <div class="sect1">
-<h2 id="_a_story_of_c">A story of C++</h2>
+<h2 id="_sources">SOURCES</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>For the past 4 months I was trying - and by trying I mean straggling - to simultaneously learn C++
-and create a wrapper around <a href="https://github.com/jltsiren/gbwtgraph">gbwtgraph</a>t . Having only limited experience exposing api
-from C, I assumed that it would have been a similar undertaking.
-It turned out quite the opposite, it&#8217;s a huge deal to export method functionality and/from C++.
-The resulting the <a href="https://github.com/pangenome/gbwt-wrapper">wrapper code</a> kept growing,
-was of low quality and not worth investing any more time.
-Maybe it was better to  rewrite the whole thing in a more modular way, in C or Rust.</p>
+<p>Much of our work involves two external C++ projects:  <a href="https://github.com/jltsiren/gbwt">jltsiren/gbwt</a>
+and <a href="https://github.com/jltsiren/gbwtgraph">jltsiren/gbwtgraph</a>
+The code for the first version of the  wrapper can be found here  <a href="https://github.com/pangenome/gbwt-wrapper">pangenome/gbwt-wrapper</a>
+The current version of the wrapper is based on the <a href="http://www.swig.org/">swig project</a>
+and is a single <a href="https://gist.githubusercontent.com/Gavlooth/f37bb312c5d163b1d889cdb6fd7b4df5/raw/48d79249074de296a78ae99a1370bc9a1d4f00b1/gbwtgraph.i">swig script file</a></p>
 </div>
 </div>
 </div>
 <div class="sect1">
-<h2 id="_enter_swig">Enter SWIG</h2>
+<h2 id="_dockerfiles">DOCKERFILES</h2>
 <div class="sectionbody">
 <div class="paragraph">
-<p>As I was ready to <strong>defenestrate</strong> a  significant amount of work hours, I stumbled upon
-SWIG. SWIG stands for <em>Simplified Wrapper and Interface Generator</em>. It abstracts
-class methods in a similar way: It exposes classes and non-primitive return values  as "void*"
-while the resulting function&#8217;s name is prefixed by that of the class.
-Unlike my version of a wrapper, it allows many other goodies, like the following:</p>
+<p>If someone wants to take a look on the first version, the gbwt wrapper is  <a href="https://gist.githubusercontent.com/Gavlooth/720bceed46bd2aad86bd6efd0c3341a5/raw/17c5891ae8b405919fdce82b242996bdcd02e586/Dockerfile">here</a></p>
 </div>
 <div class="paragraph">
-<p><span class="image"><img src="{{site.url}}/assets/overloaded_functions.png" alt="overloaded functions"></span></p>
-</div>
-<div class="paragraph">
-<p>Pretty cool IMHO, function overloading with proper error messages.</p>
-</div>
-<div class="paragraph">
-<p>Another cool aspect is the <em>typemaps</em>. SWIG uses nothing sort of a language FFI but
-rather language specific C embedding (at least for Racket), so with a small section of code like the following</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="{{site.url}}/assets/scheme_handle_t_typemap.png" alt="scheme handle t typemap">
-</div>
-</div>
-<div class="paragraph">
-<p>One can achieve seamless conversion between gbwtgraph types and types from the target language:</p>
-</div>
-<div class="imageblock">
-<div class="content">
-<img src="{{site.url}}/assets/nodes_to_handles.png" alt="nodes to handles">
-</div>
-</div>
-<div class="paragraph">
-<p>The output of <strong>GRAPH-nodes-to-handles normally</strong> is a byte array (char*)  that holds a  uint_64
-and has a byte appended at the end to indicate orientation of traversal (left = 0, right =1), not very
-user friendly. With the typemaps it is translated to a pair with either "+" or "-" and a
-Racket integer. More visual, and <strong><em>handleable</em></strong> (pan intented).</p>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_building_the_swig_based_wrapper_racket">Building the SWIG based wrapper (Racket)</h2>
-<div class="sectionbody">
-<div class="sect2">
-<h3 id="_basic_requirements">Basic requirements</h3>
-<div class="paragraph">
-<p>All libraries required to build gbwtgraph, are also required to build the wrapper so first,
-build the libraries as instructed in <a href="{{site.url}}/assets/compile_gbwtwrapper.html">How to compile the library</a></p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_prepare_gbwtgraph">Prepare gbwtgraph</h3>
-<div class="paragraph">
-<p>Next there is a peculiarity that swig has and must be dealt with. The swig preproccesor fails when
-encountering "const static" and this is not a bug  (<a href="https://github.com/swig/swig/issues/241">see here </a>).
-So do an in place replace of "const static" with "static const" in gbwtgraph&#8217;s directory :</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">find ./ | xargs -I % perl -pi -e 's/static const/const static/g' %</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Similarly do</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">perl -pi -e 's/^\[\[deprecated/\/\/\[\[deprecated/' /usr/local/include/handlegraph/types.hpp</code></pre>
-</div>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_racket_gcc">Racket gcc</h3>
-<div class="paragraph">
-<p>The default Racket binary in most implementations is "Racket CZ". We want "Racket BC"  because
-this is what swig uses. Also we want it to use the <em>cgc garbage collector</em>.
-Following the documentation <a href="https://github.com/racket/racket/blob/master/racket/src/bc/README.txt">here</a>,
-grab the latest - at the time of writting - <a href="https://download.racket-lang.org/racket-8-2-src-builtpkgs-tgz.html">racket source code</a>
-and after unziping run</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">  ./configure --enable-bcdefault  --enable-cgcdefault --prefix={installation folder here}</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Replacing {installation folder here} with your preference for installation location (I use ~/.local).</p>
-</div>
-</div>
-<div class="sect2">
-<h3 id="_compile_swig">Compile swig</h3>
-<div class="paragraph">
-<p>Finally grab the swig configuration file  <a href="https://gist.githubusercontent.com/Gavlooth/f37bb312c5d163b1d889cdb6fd7b4df5/raw/c34d7c715d2cdb1ed804bf92acfc46fb9fc1d12f/gbwtgraph.i">gbwtgraph.i</a>
-and run swig on it:</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">swig -c++ -mzscheme -declaremodule  gbwtgraph.i;</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Then use Racket&#8217;s raco tool to  compile the resulting .cxx file with the appropriate flags
-for CGC and C++ support, into an object file.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">raco ctool ++ccf  -fpermissive ++ccf -lstdc++  --cc --cgc  gbwtgraph_wrap.cxx ;</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Assuming that /usr/local/lib is the location of the gbwtgraph dependencies
-Compile the object files to a dynamic library.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">g++ -o gbwtgraph.so -Wl,--whole-archive \
-                /usr/local/lib/libgbwtgraph.a \
-                /usr/local/lib/libhandlegraph.a \
-                /usr/local/lib/libsdsl.a \
-                /usr/local/lib/libgbwt.a -Wl,--no-whole-archive -shared  ~/.local/lib/racket/mzdyn.o  gbwtgraph_wrap.o  -pthread -fopenmp</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Make the necessary "Racket module directories" , so that you can run from the current folder the compiled racket module library,  gbwtgraph.so</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">mkdir  -p $(racket -e '(string-&gt;symbol (path-&gt;string (build-path "compiled" "native" (system-library-subpath))))' | cut -c2-)</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Move the dynamic library there.</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-bash" data-lang="bash">mv gbwtgraph.so  $(racket -e '(string-&gt;symbol (path-&gt;string (build-path "compiled" "native" (system-library-subpath))))' | cut -c2-)</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>Now you cant use gbwtgraph from within Racket  by doing</p>
-</div>
-<div class="listingblock">
-<div class="content">
-<pre class="highlight"><code class="language-racket" data-lang="racket">(require "gbwtgraph")</code></pre>
-</div>
-</div>
-<div class="paragraph">
-<p>The names for all the exported functions  functions are located in the scheme_reload function
-in the gbwtgraph_wrap.cxx file generated from swig</p>
-</div>
-<div class="literalblock">
-<div class="content">
-<pre>Next steps: Differential privacy</pre>
-</div>
-</div>
-</div>
-</div>
-</div>
-<div class="sect1">
-<h2 id="_update">Update</h2>
-<div class="sectionbody">
-<div class="paragraph">
-<p>Instead of building it step by step  you use the   <a href="https://gist.githubusercontent.com/Gavlooth/0f5eba1124044a1220fdafd7c12c38c9/raw/4dbd945acc6147022fb2c68de4cb92ea48acc6e5/Dockerfile">Dockerfile</a></p>
-</div>
-<div class="sect3">
-<h4 id="_next_step">Next step</h4>
-<div class="paragraph">
-<p>Now that we managed to embed gbwtgraph in racket - with the potential of adding other languages,
-we have the necessary tools to actually make a  <strong>DSL for differential privacy on variation graphs</strong></p>
-</div>
+<p>For the (working) swig based wrapper look <a href="https://gist.githubusercontent.com/Gavlooth/0f5eba1124044a1220fdafd7c12c38c9/raw/4dbd945acc6147022fb2c68de4cb92ea48acc6e5/Dockerfile">here</a></p>
 </div>
 </div>
 </div>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2021-10-10 19:53:18 +0300
+Last updated 2021-10-20 06:55:39 +0300
 </div>
 </div>
 </body>

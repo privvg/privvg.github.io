@@ -1,0 +1,23 @@
+:cpp: C++
+
+
+= Source Code & Repositories
+
+
+
+
+==  SOURCES
+Much of our work involves two external {cpp} projects:  https://github.com/jltsiren/gbwt[jltsiren/gbwt]
+and https://github.com/jltsiren/gbwtgraph[jltsiren/gbwtgraph]
+The code for the first version of the  wrapper can be found here  https://github.com/pangenome/gbwt-wrapper[pangenome/gbwt-wrapper]
+The current version of the wrapper is based on the http://www.swig.org/[swig project]
+and is a single https://gist.githubusercontent.com/Gavlooth/f37bb312c5d163b1d889cdb6fd7b4df5/raw/48d79249074de296a78ae99a1370bc9a1d4f00b1/gbwtgraph.i[swig script file]
+
+== DOCKERFILES
+If someone wants to take a look on the first version, the gbwt wrapper is  https://gist.githubusercontent.com/Gavlooth/720bceed46bd2aad86bd6efd0c3341a5/raw/17c5891ae8b405919fdce82b242996bdcd02e586/Dockerfile[here]
+
+For the (working) swig based wrapper look https://gist.githubusercontent.com/Gavlooth/0f5eba1124044a1220fdafd7c12c38c9/raw/4dbd945acc6147022fb2c68de4cb92ea48acc6e5/Dockerfile[here]
+
+
+
+
