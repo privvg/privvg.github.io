@@ -80,24 +80,47 @@ Now we can collect words from the Haplotype and preserving privacy at the same t
 
 == The algorithm
 
-Now that we have the utility function according to the principles of Exponential mechanism we only
-need to
-Given a Haplotype H pick and sample words from  H with probability
+
+Now that we have the utility function we will procced  according to the principles of Exponential mechanism.
+That is, we will aswear the  queries, in essense with approximating sampling from  stem:[Pr(s) = e^{\tfrac{\phi (r)   }{2}} ]
+The sampling process will be iterative and the end result would be a set of words that constitute a synthetic database.
+
+Observe that the sampling function
 
 [stem]
 ++++
-Pr(s) = e^{\tfrac{\phi(r)}{2}}
+Pr(s) = e^{\tfrac{\phi (r)   }{2}}
 ++++
 
-Because that utility  function is very steep,
+depicted below has a very very steep curve
 
 image::exponential.png[Sampling function]
 
-sampling it will give as candidates that are very close to the ones of maximal frequency.
+That means, that sampling from it will give as haplotypes very close to the ones with the maximum frequency, most of the time
+Previously we created a very involved wrapper around BGWTGRAPH -using SWIG- which is the de facto tool for manipulating
+Haplotypes.
 
-First we sample a singe node fo
+Thanks to SWIG we have used the  [red]#SearchState struct# methods [red]#size find# and [red]#extend# to
+implement the following  function to racket
 
 [source,racket]
+----
+(define (sample-single-state graph #:epsilon [ε  0.1] state)
+  (define  state-list (map (λ (x)  (convert-void x)) (GRAPH-extend-to-valid-states graph state)))
+  (define max-frequency (SearchState-size  (find-max-frequency state-list)))
+  (define Δu  (log (/ max-frequency (+ 1 max-frequency))))
+  (define utility (make-utility  ε Δu))
+  (map (λ (x) (utility  (SearchState-size x))) state-list)
+  (define calculated-utilities )
+  (convert-void (car (sample-distribution calculated-utilities state-list 1))))
+----
+
+The [source,racket] (sample-distribution)  is also a custom  :cpp: function.
+
+
+
+
+
 
 
 
