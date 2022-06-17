@@ -53,7 +53,7 @@ keep in mind two things: We need to add noise to Haplotype selection. The way to
 
 == Defining utility for a Haplotype
 
-A Haplotype is collection of "words" like GFAG GTAFG etc etc. We want to select words and make them available for statistical analysis, without
+A Haplotype is collection of "words" like GCAG GGCTAG etc etc. We want to select words and make them available for statistical analysis, without
 making available information with respect of the Haplotype.
 The first thing to avoid is picking rare individuals, because theese are almost surely uniquely identified in the haplotype.
 We also know that unicq individuals are very dense, almost all words in a haplotype is unique.
@@ -116,6 +116,11 @@ implement the following  function to racket
 ----
 
 The [source,racket] (sample-distribution)  is also a custom  :cpp: function.
+
+Each time we call  sample-single-state  we feed it the result of the previous call. Each time
+it tries to extend a word  to one of possible maximal utility  until that word  has no  extensions.
+The result is a word (haplotype) probably as large as possible
+
 
 
 
