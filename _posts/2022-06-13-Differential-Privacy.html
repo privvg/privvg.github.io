@@ -5,8 +5,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="generator" content="Asciidoctor 2.0.16">
-<meta name="author" content="Christos Chatzifountas">
-<title>Differential privacy on Genomic data</title>
+<title>Differential privacy over pangenome haplotypes</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:300,300italic,400,400italic,600,600italic%7CNoto+Serif:400,400italic,700,700italic%7CDroid+Sans+Mono:400,700">
 <style>
 /*! Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
@@ -440,23 +439,35 @@ body.book #toc,body.book #preamble,body.book h1.sect0,body.book .sect1>h2{page-b
 </head>
 <body class="article">
 <div id="header">
-<h1>Differential privacy on Genomic data</h1>
-<div class="details">
-<span id="author" class="author">Christos Chatzifountas</span><br>
-<span id="email" class="email"><a href="mailto:christos.chatzifountas@yahoo.gr">christos.chatzifountas@yahoo.gr</a></span><br>
-</div>
+<h1>Differential privacy over pangenome haplotypes</h1>
 </div>
 <div id="content">
+<div id="preamble">
+<div class="sectionbody">
+<div class="paragraph">
+<p>Christos Chatzifountas  &lt;<a href="mailto:christos.chatzifountas@yahoo.gr">christos.chatzifountas@yahoo.gr</a>&gt;</p>
+</div>
+</div>
+</div>
 <div class="sect1">
 <h2 id="_differential_privacy_aka_how_to_protect_individuals">Differential privacy AKA how to protect individuals</h2>
 <div class="sectionbody">
+<div class="sect2">
+<h3 id="_synthetic_database">Synthetic Database</h3>
 <div class="paragraph">
 <p>Our main purpose is to be able to draw information from a database of genomes
 (Haplotypes) and at the same time, protecting individuals from exposure and.
-Differential privacy builds conceptually on a method known as <a href="https://en.wikipedia.org/wiki/Randomized_response#:~:text=A%20person%20is%20asked%20if,coin%20or%20their%20true%20experience">randomized response</a>.
+In the essence we crave to expose subset of that database that holds a good
+amount of information, on the whole, but no particular individual is identified
+as overly important. This subset will be what we name a [red]#Synthetic [red]#Database.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_introducing_utility_and_noise">Introducing utility and noise</h3>
+<div class="paragraph">
+<p>Differential privacy <a href="#DP">[DP]</a> builds conceptually on a method known as <a href="https://en.wikipedia.org/wiki/Randomized_response#:~:text=A%20person%20is%20asked%20if,coin%20or%20their%20true%20experience">randomized response</a>.
 The key idea is that when introducing <a href="https://en.wikipedia.org/wiki/Additive_noise_mechanisms">mechanisms that add noise</a> to the output of a query, private information
-is hidden (because is noisy)  but more general information, like mean values and
-standard deviation is preserved</p>
+is hidden (because is noisy)  but more general information, like mean values and standard deviation is preserved</p>
 </div>
 <div class="paragraph">
 <p>The idea of  Randomized response  was a common technique applied
@@ -485,14 +496,14 @@ query, if for example the query has not a  numerical  output</p>
 <p>Let \(D\) be a set of database, that we want to extract information in a private manner and
 \(\mathcal{R}\) the set of outputs to a query (that might not be numerical in nature). Also assume that we have
 \(u:D \times \mathcal{R} \rightarrow \mathbb{R}\)  a "scoring mechanism" that we refer as the "utility function".
-One can think the utility function as a way to assing a score to query output and  measure its significance,
-even if the query whatever the query might return.</p>
+One can think the utility function as a way to assing an score to query output and  measure it&#8217;s significance,
+whatever the query might return.</p>
 </div>
 <div class="paragraph">
 <p>If \(\Delta u\)  is the maximum absolute difference that any two neigboor database  can have then</p>
 </div>
 <div class="paragraph">
-<p>The exponential mechanism is just to select an \(r\in \mathcal{R}\)  with probability proportional to  \(e^(\frac{\epsilon u(x,r) } {2\Delta u})\)</p>
+<p>The exponential mechanism is just to select an \(r\in \mathcal{R}\)  with probability proportional to  \(e^(\frac{\epsilon u(x,r)} {2\Delta u})\)</p>
 </div>
 <div class="paragraph">
 <p>The quantity   \(\Delta u\)  is super important. The intuition behind is that we do not want to select an element very outside of
@@ -507,10 +518,8 @@ It suffice to say that when one makes differentially private queries in successi
 keep in mind two things: We need to add noise to Haplotype selection. The way to do that is via the exponential mechanism.</p>
 </div>
 </div>
-</div>
-<div class="sect1">
-<h2 id="_defining_utility_for_a_haplotype">Defining utility for a Haplotype</h2>
-<div class="sectionbody">
+<div class="sect2">
+<h3 id="_defining_utility_for_haplotypes">Defining utility for  Haplotypes</h3>
 <div class="paragraph">
 <p>A Haplotype is collection of "words" like GCAG GGCTAG etc etc. We want to select words and make them available for statistical analysis, without
 making available information with respect of the Haplotype.
@@ -539,10 +548,8 @@ is either 0 or 1.</p>
 <p>Now we can collect words from the Haplotype and preserving privacy at the same time</p>
 </div>
 </div>
-</div>
-<div class="sect1">
-<h2 id="_the_algorithm">The algorithm</h2>
-<div class="sectionbody">
+<div class="sect2">
+<h3 id="_the_algorithm">The algorithm</h3>
 <div class="paragraph">
 <p>Now that we have the utility function we will procced  according to the principles of Exponential mechanism.
 That is, we will aswear the  queries, in essense with approximating sampling from  \(Pr(s) = e^{\tfrac{\phi (r)   }{2}} \)
@@ -586,12 +593,36 @@ implement the following  function to racket</p>
 </div>
 </div>
 <div class="paragraph">
-<p>The [source,racket] (sample-distribution)  is also a custom  :cpp: function.</p>
+<p>Here <code>(sample-distribution)</code> is a custom  C++ function that allows us
+to sample from a function, when the range of the function can be explicitly calculated.</p>
 </div>
 <div class="paragraph">
-<p>Each time we call  sample-single-state  we feed it the result of the previous call. Each time
-it tries to extend a word  to one of possible maximal utility  until that word  has no  extensions.
-The result is a word (haplotype) probably as large as possible</p>
+<p>We call the <code> sample-single-state  </code> recursively - eachtime we feed the output of the previous time.
+Each time we extend a word to a bigger word with possible, maximal frequency  maximal utility
+until the resulting word  has no  extensions. That way we obtain a haplotype that has a high probability to be as large as possible</p>
+</div>
+<div class="paragraph">
+<p>You can build and see the whole process <a href="https://github.com/Gavlooth/DP_WIP">here</a></p>
+</div>
+<div class="paragraph">
+<p>The virtue of that method is that each time we extend a word we have (Differential) Privacy, we don&#8217;t expose  the
+haplotypes that are most useful to us and the resulting word is private because of the composition theorem.
+We might loose information on the individual that way but by repeating that process a reasonable number of times
+we get a collection of haplotypes that have a good mean utility, since statistical information is not sewed by
+randomness. This kind of collection is a good candidate for a  [red]#Synthetic [red]#Database.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_challenges_and_next_step">Challenges and Next step</h3>
+<div class="paragraph">
+<p>Our main purpose is to build tools so that individuals can share genomic
+data safely. While the mathematical challenge are almost there, making
+GBWT and GBWGRAPH - which are projects with the scope to manipulate genomic data -
+available outside a C++ project has been proven a Herculian task, and a wrapper
+is unlikely to improve usability. Another much more promising tool is  <a href="#odgi">[odgi]</a>
+It is very mature and recently has exported a friendly C FFI - ipso facto - it worths
+investigating</p>
+</div>
 </div>
 </div>
 </div>
@@ -601,7 +632,13 @@ The result is a word (haplotype) probably as large as possible</p>
 <div class="ulist bibliography">
 <ul class="bibliography">
 <li>
+<p><a id="DP"></a>[DP] Cynthia Dwork, Aaron Roth. The Algorithmic Foundations of Differential Privacy</p>
+</li>
+<li>
 <p><a id="biz"></a>[biz] Blair, Imai and Zhou. Design and Analysis of the Randomized Response Technique</p>
+</li>
+<li>
+<p><a id="odgi"></a>[odgi] Andrea Guarracino, Simon Heumos, Sven Nahnsen, Pjotr Prins, Erik Garri. ODGI: understanding pangenome graphs</p>
 </li>
 </ul>
 </div>
@@ -610,7 +647,7 @@ The result is a word (haplotype) probably as large as possible</p>
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-06-17 16:22:59 +0300
+Last updated 2022-06-17 19:51:05 +0300
 </div>
 </div>
 <script type="text/x-mathjax-config">

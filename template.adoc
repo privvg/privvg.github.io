@@ -1,16 +1,23 @@
 :cpp: C++
 :stem: latexmath
 
-= Differential privacy on Genomic data
+= Differential privacy over pangenome haplotypes
+
 Christos Chatzifountas  <christos.chatzifountas@yahoo.gr>
 
 == Differential privacy AKA how to protect individuals
+
+=== Synthetic Database
 Our main purpose is to be able to draw information from a database of genomes
 (Haplotypes) and at the same time, protecting individuals from exposure and.
-Differential privacy builds conceptually on a method known as https://en.wikipedia.org/wiki/Randomized_response#:~:text=A%20person%20is%20asked%20if,coin%20or%20their%20true%20experience[randomized response].
+In the essence we crave to expose subset of that database that holds a good
+amount of information, on the whole, but no particular individual is identified
+as overly important. This subset will be what we name a [red]#Synthetic [red]#Database.
+
+=== Introducing utility and noise
+Differential privacy <<DP>> builds conceptually on a method known as https://en.wikipedia.org/wiki/Randomized_response#:~:text=A%20person%20is%20asked%20if,coin%20or%20their%20true%20experience[randomized response].
 The key idea is that when introducing https://en.wikipedia.org/wiki/Additive_noise_mechanisms[mechanisms that add noise] to the output of a query, private information
-is hidden (because is noisy)  but more general information, like mean values and
-standard deviation is preserved
+is hidden (because is noisy)  but more general information, like mean values and standard deviation is preserved
 
 The idea of  Randomized response  was a common technique applied
 to surveys <<biz>> and is prior of Differential privacy. Differential Privacy is more involved and suited to modern
@@ -31,16 +38,15 @@ From theese only the exponential mechanism is important to us, because it allows
 select elements when it is impossible to directly add noise to the output of a
 query, if for example the query has not a  numerical  output
 
-
 Let stem:[D] be a set of database, that we want to extract information in a private manner and
 stem:[\mathcal{R}] the set of outputs to a query (that might not be numerical in nature). Also assume that we have
 stem:[u:D \times \mathcal{R} \rightarrow \mathbb{R}]  a "scoring mechanism" that we refer as the "utility function".
-One can think the utility function as a way to assing a score to query output and  measure its significance,
-even if the query whatever the query might return.
+One can think the utility function as a way to assing an score to query output and  measure it's significance,
+whatever the query might return.
 
 If stem:[\Delta u]  is the maximum absolute difference that any two neigboor database  can have then
 
-The exponential mechanism is just to select an stem:[r\in \mathcal{R}]  with probability proportional to  stem:[e^(\frac{\epsilon u(x,r) } {2\Delta u})]
+The exponential mechanism is just to select an stem:[r\in \mathcal{R}]  with probability proportional to  stem:[e^(\frac{\epsilon u(x,r)} {2\Delta u})]
 
 The quantity   stem:[\Delta u]  is super important. The intuition behind is that we do not want to select an element very outside of
 the scope of the query and stem:[\Delta u]  prohibits us from doing exactly that
@@ -51,7 +57,7 @@ It suffice to say that when one makes differentially private queries in successi
 The reader should at least
 keep in mind two things: We need to add noise to Haplotype selection. The way to do that is via the exponential mechanism.
 
-== Defining utility for a Haplotype
+=== Defining utility for  Haplotypes
 
 A Haplotype is collection of "words" like GCAG GGCTAG etc etc. We want to select words and make them available for statistical analysis, without
 making available information with respect of the Haplotype.
@@ -74,11 +80,9 @@ having stem:[\phi(r)]  is a bit more convenient since stem:[\Delta[u] = 1] since
 is either 0 or 1.
 
 
-
 Now we can collect words from the Haplotype and preserving privacy at the same time
 
-
-== The algorithm
+=== The algorithm
 
 
 Now that we have the utility function we will procced  according to the principles of Exponential mechanism.
@@ -115,17 +119,31 @@ implement the following  function to racket
   (convert-void (car (sample-distribution calculated-utilities state-list 1))))
 ----
 
-The [source,racket] (sample-distribution)  is also a custom  :cpp: function.
+Here pass:[<code>(sample-distribution)</code>] is a custom  pass:[C++] function that allows us
+to sample from a function, when the range of the function can be explicitly calculated.
 
-Each time we call  sample-single-state  we feed it the result of the previous call. Each time
-it tries to extend a word  to one of possible maximal utility  until that word  has no  extensions.
-The result is a word (haplotype) probably as large as possible
+We call the pass:[<code> sample-single-state  </code>] recursively - eachtime we feed the output of the previous time.
+Each time we extend a word to a bigger word with possible, maximal frequency  maximal utility
+until the resulting word  has no  extensions. That way we obtain a haplotype that has a high probability to be as large as possible
+
+You can build and see the whole process https://github.com/Gavlooth/DP_WIP[here]
+
+The virtue of that method is that each time we extend a word we have (Differential) Privacy, we don't expose  the
+haplotypes that are most useful to us and the resulting word is private because of the composition theorem.
+We might loose information on the individual that way but by repeating that process a reasonable number of times
+we get a collection of haplotypes that have a good mean utility, since statistical information is not sewed by
+randomness. This kind of collection is a good candidate for a  [red]#Synthetic [red]#Database.
 
 
+=== Challenges and Next step
 
-
-
-
+Our main purpose is to build tools so that individuals can share genomic
+data safely. While the mathematical challenge are almost there, making
+GBWT and GBWGRAPH - which are projects with the scope to manipulate genomic data -
+available outside a pass:[C++] project has been proven a Herculian task, and a wrapper
+is unlikely to improve usability. Another much more promising tool is  <<odgi>>
+It is very mature and recently has exported a friendly C FFI - ipso facto - it worths
+investigating
 
 
 
@@ -143,4 +161,6 @@ The result is a word (haplotype) probably as large as possible
 [bibliography]
 == References
 
+* [[[DP]]] Cynthia Dwork, Aaron Roth. The Algorithmic Foundations of Differential Privacy
 * [[[biz]]] Blair, Imai and Zhou. Design and Analysis of the Randomized Response Technique
+* [[[odgi]]] Andrea Guarracino, Simon Heumos, Sven Nahnsen, Pjotr Prins, Erik Garri. ODGI: understanding pangenome graphs
