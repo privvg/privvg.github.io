@@ -44,7 +44,7 @@ query, as is for example for queries with no numerical  output
 Let stem:[D] be a set of database, that we want to extract information from and in a private manner, and
 stem:[\mathcal{R}] be the set of outputs to a query (that might not be numerical in nature). Assume that we have
 stem:[u:D \times \mathcal{R} \rightarrow \mathbb{R}]  a "scoring mechanism" that we refer as the "utility function".
-One can think the utility function as a way to assing an score to query output and measure it's significance,
+One can think the utility function as a way to assing an score to query output and measure its significance,
 whatever the query might return.
 
 If stem:[\Delta u]  is the maximum absolute difference that any two neigboor database  can have then
