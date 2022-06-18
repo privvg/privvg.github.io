@@ -143,7 +143,8 @@ randomness. This kind of collection is a good candidate for a  [red]#Synthetic [
 Our main purpose is to build tools so that individuals can share genomic
 data safely. While the mathematical challenges are almost solved, making
 GBWT and GBWGRAPH - which are projects indented to manipulate genomic data -
-available outside a pass:[C++] project has been proven a Herculian task, and the wrapper
+available outside a pass:[C++] project has been proven a Herculian task as
+demonstrated in my https://privvg.github.io/2021/09/13/building-GBWTGRAPH-interface-in-swig.html[previous post], and the wrapper
 created in the previous post is unlikely to sufficiently improve usability.
 Another much more promising tool is  <<odgi>>
 It is very mature and recently has exposed a
