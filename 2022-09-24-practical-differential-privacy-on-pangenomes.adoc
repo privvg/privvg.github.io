@@ -72,10 +72,11 @@ In essence, this approach samples haplotypes from a pangenome graph (formally, a
 The exponential mechanism operates on the exponentiated _utility_ of query results, releasing randomly sampled data elements stem:[\propto \exp(u)].
 Exponentiation helps to provide differential privacy guarantees, while utility is a social construct that lets us define which database elements are more important.
 
-In our context, we assume that the utility of a haplotype observation (equivalently: allele, or genomic subsequence) is the frequency of this sequence in the population.
+In our context, we assume that the utility of a haplotype observation (equivalently: allele, or genomic subsequence) is the log-frequency of this sequence in the population.
 Intuitively, more common haplotypes are more likely to be found in other individuals.
 The better that these are represented in our pangenome, the better the pangenome will contain or represent a new genome.
 This makes them more useful.
+However, the incremental benefit of one high frequency allele over another is proportionally less than for lower-frequency alleles (thus, we take the logarithm of frequency).
 We also would like to not expose too many rare haplotypes, as they may allow for privacy-destructive attacks, so their release would decrease utility.
 
 By guiding the exponential mechanism using _haplotype frequency_ as utility, we will obtain a pangenome that represents group characteristics and common sequences in the pangenome.
@@ -140,8 +141,11 @@ while sampled_length < target_length:
     sum_weights := 0
     weights := []
     for next in nexts:
-      utility := next.size()  # frequency of the extension is utility
-      delta_utility := 1      # by definition, adding an individual changes utility by 1
+      # log-frequency of the extension is utility
+      utility := log1p(next.size())
+      # sensitivity, or the effect of removing an individual on utility
+      delta_utility := utility - log1p(next.size()-1)
+      # weight for sampling
       weight := exp((epsilon * utility) / (2 * delta_utility))
       weights.append((weight, next))
       sum_weights += weight
@@ -186,7 +190,7 @@ We'll use tools from `odgi` to get access to the graph itself.
 === Looking at MHC pangenome graph
 
 First, we built a graph of the MHC using the https://github.com/pangenome/pggb[PanGenome Graph Builder, `pggb`].
-(We collected MHC sequences https://github.com/pangenome/MHC[as described in this short tutorial].)
+(We collected MHC sequences https://github.com/pangenome/MHC[as described in this short tutorial], and then built the graph using `pggb -n 90 -p 90 -s 50k -k 29` with 0.3.1+237bf05.)
 
 We download, unpack it, and build an `odgi` graph from it.
 
@@ -275,7 +279,7 @@ odgi stats -i mhc_priv.og -S
 [source,shell]
 ----
 #length nodes   edges   paths   steps
-5372615 257163  293239  52988   19424692
+5372615 257163  292605  53012   19374084
 ----
 
 We see that there are ~53k paths in the graph with a similar step count to our input graph, so the paths are much more fragmented.
@@ -318,11 +322,94 @@ This suggests that it should be straightforward to build a differentially privat
 
 === What about stem:[\epsilon]?
 
+One parameter defines how noisy our transformation is: stem:[\epsilon].
+A low stem:[\epsilon] is likely to be private, but we may introduce too much noise for the database to be useful.
+So we want to consider changing this parameter and looking at its effect on the output.
+
 When stem:[\epsilon] is small, it means that it is difficult for an adversary to distinguish, for pairs of adjacent databases, the database which includes or does not include an individual.
 In other words, stem:[\epsilon] defines the degree of noise, noisy sampling, or blurring that is added to differentially private queries or synthetic databases.
 When the amount of noise is large (when stem:[\epsilon] is small), it overwhelms the effects of addition or subtraction of a single individual, thus making it impossible for the adversary to distinguish individuals in general <<dwork2014>>.
 
+Let's sweep stem:[\epsilon] and look at a population genetic parameter of the output graph, the allele frequency.
+In our graphs, allele frequency is equivalent to path depth over nodes (which in the pangenome variation graph are sequences, which are equivalent to alleles).
+We can extract it with `odgi depth -d` and plot it with https://www.r-project.org/[`R`].
+
+[source,shell]
+----
+for e in 0.001 0.01 0.1 1;
+do
+    odgi priv -i mhc.og -o - -t 16 -b 10000 -d 100 -e $e -P \
+      | odgi depth -i - -d >mhc.e$e.tsv && \
+    Rscript -e 'x <- read.delim("'mhc.e$e.tsv'"); require(tidyverse); ggplot(subset(x,depth.uniq>0), aes(x=depth.uniq)) + geom_histogram(binwidth=1) + xlim(0,200); ggsave("'mhc.e$e.tsv.hist.png'", height=3, width=9)'
+done
+----
+
+The input allele/node frequency spectrum shows a sharp peak at ~90, which is the number of haplotypes in the pangenome.
+
+image::../../../assets/mhc.tsv.hist.png[MHC graph allele frequency spectrum]
+
+But we do not see a similar pattern in a 100x-sampled privvg when using a small stem:[\epsilon = 0.001].
+We actually see a rather flat frequency distribution, which hides the peaks seen in the real data:
+
+image::../../../assets/mhc.e0.001.tsv.hist.png[MHC privvg e=0.001 allele frequency spectrum]
+
+The pattern is similar for stem:[\epsilon = 0.01]:
+
+image::../../../assets/mhc.e0.01.tsv.hist.png[MHC privvg e=0.01 allele frequency spectrum]
+
+At stem:[\epsilon = 0.1], we start to observe more low-frequency alleles, consistent with a more relaxed privacy guarantee:
+
+image::../../../assets/mhc.e0.1.tsv.hist.png[MHC privvg e=0.1 allele frequency spectrum]
+
+And with stem:[\epsilon = 1], we begin to see a peak around the target depth (100x):
+
+image::../../../assets/mhc.e1.tsv.hist.png[MHC privvg e=1 allele frequency spectrum]
+
+This becomes progressively more prononced as we increase stem:[\epsilon = 10]:
+
+image::../../../assets/mhc.e10.tsv.hist.png[MHC privvg e=10 allele frequency spectrum]
+
+And for stem:[\epsilon = 100], the pattern is starting to be reminiscient of the kind of distribution we saw in the input data, with the peak near 100x rather than 90x of course:
+
+image::../../../assets/mhc.e100.tsv.hist.png[MHC privvg e=100 allele frequency spectrum]
+
+=== The effect of changing stem:[\epsilon]
+
+By increasing stem:[\epsilon] we are exponentially down-weighting rare haplotypes.
+We don't follow them because the weight of a given option, stem:[\exp(\epsilon u(x, r) / \Delta u)], becomes exponentially larger with higher utility (a.k.a. `log1p(haplotype_frequency)`).
+In effect, we often run down the graph sampling the major allele at every site.
+The sampled haplotypes can become very long and uniform in length, because they tend to always match our minimum frequency threshold requirements and run to our target length.
+
+At the same time, when increasing stem:[\epsilon], we observe an increase in rare alleles in the privvg synthetic pangenome.
+This pattern is consistent with a reduction in differential privacy guarantees.
+Rare alleles support the identification of individuals.
+
+These patterns gives the impression that stem:[\epsilon] is behaving as expected, although it's worth noting that the interaction between our utility function and privacy is also somewhat confusing.
+We will already tend to over-weight common haplotypes due to them having greater utility by our definition.
+
 == Consclusions and next steps
+
+We've provided a practical first implementation of differential privacy on pangenome graphs.
+Our approach is simple and largely follows standard concepts from the differential privacy literature, but the unique application context has made its development require a substantial amount of study.
+
+Although we have demonstrated that our implementation in `odgi priv` follows expected behavior with respect to several key parameters, further evaluation will be required to ascertain the degree to which it provides the desired differential privacy behavior.
+
+=== Final deliverables
+
+We plan to close the project with two final deliverables that build on our implementation.
+
+First, we will develop a privvg model from the HPRCy1 draft pangenome.
+We will apply methods like the https://github.com/refresh-bio/agc[assembled genomes compressor `agc`] to measure the effect of different parameters on the whole pangenome behavior of privvg.
+Because the HPRC is fully public, the utility of this resource is merely research-related, but it will be the first attempt to build such a model for a whole collection of completely assembled genomes.
+
+Second, we will establish a set of synthetic "pangenome pairs", where we add and remove specific individuals.
+We will present these as a public competition, with a nominal prize for anyone who is able to determine which individuals have been removed from which pangenome model.
+By soliciting empirically-driven responses and workflows that describe the privacy-adversarial attacks, we will build practice around the problem of differential privacy on pangenomes.
+In effect, this will attach a bounty on the quality of our approach, initating a long-running audit that will establish the practical foundation for applying privvg to real cohort data.
+
+== Funding
+
+https://nlnet.nl/project/VariationGraph/[This project has been funded] through the https://nlnet.nl/discovery[NGI0 Discovery Fund], a fund established by https://nlnet.nl/[NLnet] with financial support from the European Commission's https://ngi.eu/[Next Generation Internet] programme, under the aegis of DG Communications Networks, Content and Technology under grant agreement No 825322.
 
 [bibliography]
 == References
