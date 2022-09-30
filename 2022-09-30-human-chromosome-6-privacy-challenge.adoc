@@ -1,0 +1,130 @@
+:cpp: C++
+:stem: latexmath
+
+= Human chromosome 6 privacy challenge
+
+Erik Garrison  <erik.garrison@gmail.com>
+
+_tl;dr_: We've released our new privvg method in the https://github.com/pangenome/odgi[odgi toolkit].
+Here, we put forward a set of differentially private sequence collections based on different versions of chromosome 6 from the https://humanpangenome.org/[human pangenome project].
+We're offering a bounty to the first hacker to attack these collections and determine the identity of which individuals are present in which graph.
+
+== Pangenome privacy
+
+We've built up tooling that lets us take a pangenome graph and project out a synthetic pangenome which is stem:[\epsilon]-differentially private.
+We call this the privvg algorithm.
+At heart, it follows the exponential mechanism developed in differential privacy <<dwork2014>>, but casts the exploration of the emission space into a guided walk over the path space of the graph.
+We take allele frequency to be utility, and paths are walked according to utility exponentially weighted by the stem:[\epsilon] privacy parameter.
+As long as stem:[\epsilon] is low, we can't reliably know when a single individual is present or not in the input to privvg, even if we know the entire genome sequence of that individual.
+
+== Haplotype hide and seek
+
+The math for our model is simple, and grounded firmly on existing methods which prove bounds on the amount of information leakage—or privacy loss—which we incur.
+To a first approximation, we expect that by setting stem:[\epsilon] low, such as stem:[\epsilon = 0.01], it will be difficult to extract individually-identifiable information from the output.
+In effect, the frequency-based utility function that we use will be weighted less, reducing potential information flow describing haplotype and allele frequencies.
+
+By design, we also need to avoid haplotypes which are unique to a single individual, leading to a lower bound on the frequency of a sampled haplotype stem:[\mathcal D >= 2].
+
+The model is simple, but, there may be features of this model or our implementation that lead to leakage of information.
+
+To guard against this, we are sponsoring a competition.
+We have produced multiple differentially private versions of human chromosome 6, based on the HPRC/human pangenome data <<liao2022>>.
+This is large enough to be a significant fraction of the genome (it's 5.52% of https://www.ncbi.nlm.nih.gov/assembly/GCF_009914755.1/[T2T-CHM13]) but small enough to be easy to process quickly, with most analysis steps taking seconds to minutes.
+It also includes the https://en.wikipedia.org/wiki/Major_histocompatibility_complex[MHC], which we https://privvg.github.io/2022/09/24/practical-differential-privacy-on-pangenomes.html[used previously as a test case for our privvg implementation].
+
+=== The game
+
+We provide a source graph and several different projections from the graph.
+These were produced by first removing a given individual's haplotypes from the graph, and then generating a privvg projection with relatively stringent parameters.
+
+Here's a recipe to make one of the transformations.
+
+First, we get the `chr6` pangenome graph and set up the `odgi` index and the list of paths.
+
+[source,shell]
+----
+wget https://f004.backblazeb2.com/file/pangenome/privvg/chr6.gfa.zst
+unzstd chr6.gfa.zst
+odgi build -g chr6.gfa -o chr6.og
+odgi paths -i chr6.og -L >chr6.og.paths.txt
+----
+
+Then, for a series of `name` `i` pairs, we remove that specific sample from the data and then generate a stem:[\epsilon=0.01]-differentially private graph with a minimum haplotype frequency of 3, a target coverage of 30x, and a haplotype sample length of 10kb.
+
+[source,shell]
+----
+name=x
+i=999
+cat chr6.og.paths.txt | grep -v ^$name >keep.$i
+odgi paths -i chr6.og -K keep.$i -o - \
+  | odgi priv -i chr6.og -d 30 -e 0.01 -c 3 -b 10000 -t 24 -P -o $i.og
+odgi paths -i $i.og -f | bgzip -@ 48 >$i.fa.gz
+----
+
+At the end, we're not producing the graph, but rather sequences in FASTA format from the pangenome.
+This is less likely to expose private information than the graph, which includes topological features that can leak information about included samples.
+
+We've made six files:
+
+[source,shell]
+----
+for i in 0 1 2 3 4 5; do
+  wget https://f004.backblazeb2.com/file/pangenome/privvg/$i.fa.gz
+done
+----
+
+This is the raw material of the challenge.
+If there is information leakage, comparing these with the original graph (https://f004.backblazeb2.com/file/pangenome/privvg/chr6.gfa.zst) should reveal which samples have been removed from which graphs.
+Only a single sample has been removed from each graph, except for one, which is based on the full `chr6.og` input.
+
+=== A cash reward!
+
+We will provide a $1000 reward to the first hacker who publishes an attack on these sequence sets that correctly describes which individuals are removed from which and which sequence set samples the entire collection in the chr6 pangenome graph.
+The results must be posted publicly, ideally on a public repository, and should be reproducible.
+Any successful attacks will be documented in subsequent posts on this blog, and should hopefully lead to improvements in the privvg method.
+
+=== Simple tests for similarity
+
+In theory, removing samples should show up in locality sensitive hashing methods like https://github.com/marbl/Mash[Mash] <<ondov2016>> which are used to compare genomes.
+
+You could sketch the FASTA files and compare them to the FASTA for each genome within the graph.
+
+First, we'd set up the sequences (FASTA) of the paths in the chr6 pangenome graph:
+
+[source,shell]
+----
+odgi paths -i chr6.og -f | bgzip -@ 24 >chr6.fa.gz && samtools faidx chr6.fa.gz
+cat chr6.fa.gz.fai | cut -f 1 -d# | uniq >sample.names
+mkdir -p samples
+for f in $(cat sample.names); do
+  echo $f
+  samtools faidx chr6.fa.gz $(grep $f'#' chr6.fa.gz.fai |cut -f 1) \
+    | bgzip -@ 24 >samples/$f.fa.gz && samtools faidx samples/$f.fa.gz
+  mash sketch samples/$f.fa.gz
+done
+----
+
+Now, in `samples/` we have a lot of FASTA files and Mash sketches.
+We can then sketch the privvg outputs and compare these to each genome.
+
+[source,shell]
+----
+mash sketch 0.fa.gz
+mash dist 0.fa.gz.msh samples/*.msh
+----
+
+Given that the sequence sets are stem:[\epsilon=0.01]-differentially private, this probably should not work, even if the sketch size is made much larger to increase sensitivity.
+The randomness in sampling outweighs potential change in output synthetic data sets.
+It would be interesting to see at what configuration of `odgi priv` this kind of approach begins to highlight which sample is removed.
+But, I've convinced myself through these tests that the answer is not immediately obvious, and I by putting forward this challenge I won't immediately lose $1k!
+
+== Funding
+
+https://nlnet.nl/project/VariationGraph/[This project has been funded] through the https://nlnet.nl/discovery[NGI0 Discovery Fund], a fund established by https://nlnet.nl/[NLnet] with financial support from the European Commission's https://ngi.eu/[Next Generation Internet] programme, under the aegis of DG Communications Networks, Content and Technology under grant agreement No 825322.
+
+[bibliography]
+== References
+
+* [[[dwork2014]]] Dwork, Cynthia, and Aaron Roth. 2014. “The Algorithmic Foundations of Differential Privacy.” Foundations and Trends in Theoretical Computer Science 9 (3–4): 211–407. https://privacytools.seas.harvard.edu/files/privacytools/files/the_algorithmic_foundations_of_differential_privacy_0.pdf
+* [[[ondov2016]]] Ondov, Brian D., Todd J. Treangen, Páll Melsted, Adam B. Mallonee, Nicholas H. Bergman, Sergey Koren, and Adam M. Phillippy. 2016. “Mash: Fast Genome and Metagenome Distance Estimation Using MinHash.” Genome Biology 17 (1): 132. https://doi.org/10.1186/s13059-016-0997-x
+* [[[liao2022]]] Liao, Wen-Wei, Mobin Asri, Jana Ebler, Daniel Doerr, Marina Haukness, Glenn Hickey, Shuangjia Lu, et al. 2022. “A Draft Human Pangenome Reference.” bioRxiv. https://doi.org/10.1101/2022.07.09.499321.
