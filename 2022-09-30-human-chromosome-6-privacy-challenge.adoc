@@ -57,9 +57,12 @@ name=x
 i=999
 cat chr6.og.paths.txt | grep -v ^$name >keep.$i
 odgi paths -i chr6.og -K keep.$i -o - \
-  | odgi priv -i chr6.og -d 30 -e 0.01 -c 3 -b 10000 -t 24 -P -o $i.og
+  | odgi priv -i - -d 30 -e 0.01 -c 3 -b 10000 -t 24 -P -o $i.og
 odgi paths -i $i.og -f | bgzip -@ 48 >$i.fa.gz
 ----
+
+_n.b. The above command was incorrect in the first version of this post._
+_Thanks to Ivar Grytten for the bugfix!_
 
 At the end, we're not producing the graph, but rather sequences in FASTA format from the pangenome.
 This is less likely to expose private information than the graph, which includes topological features that can leak information about included samples.

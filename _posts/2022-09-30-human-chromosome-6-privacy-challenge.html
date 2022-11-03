@@ -515,9 +515,13 @@ odgi paths -i chr6.og -L &gt;chr6.og.paths.txt</code></pre>
 i=999
 cat chr6.og.paths.txt | grep -v ^$name &gt;keep.$i
 odgi paths -i chr6.og -K keep.$i -o - \
-  | odgi priv -i chr6.og -d 30 -e 0.01 -c 3 -b 10000 -t 24 -P -o $i.og
+  | odgi priv -i - -d 30 -e 0.01 -c 3 -b 10000 -t 24 -P -o $i.og
 odgi paths -i $i.og -f | bgzip -@ 48 &gt;$i.fa.gz</code></pre>
 </div>
+</div>
+<div class="paragraph">
+<p><em>n.b. The above command was incorrect in the first version of this post.</em>
+<em>Thanks to Ivar Grytten for the bugfix!</em></p>
 </div>
 <div class="paragraph">
 <p>At the end, we&#8217;re not producing the graph, but rather sequences in FASTA format from the pangenome.
@@ -619,7 +623,7 @@ But, I&#8217;ve convinced myself through these tests that the answer is not imme
 </div>
 <div id="footer">
 <div id="footer-text">
-Last updated 2022-09-30 18:44:19 +0200
+Last updated 2022-11-03 18:32:16 -0500
 </div>
 </div>
 <script type="text/x-mathjax-config">
